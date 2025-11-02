@@ -176,7 +176,6 @@ M.run = function()
           table.insert(errors, error)
         end
       end
-      vim.notify("TSGo: Final errors before set_qflist: " .. vim.inspect(errors), vim.log.levels.INFO, get_notify_options())
 
       utils.set_qflist(errors, {
       auto_open = config.auto_open_qflist,
@@ -237,9 +236,7 @@ M.run = function()
   end
 
     local function on_stdout(output, project)
-      vim.notify("TSGo: Raw output from tsgo: " .. vim.inspect(output), vim.log.levels.INFO, get_notify_options())
       local result = utils.parse_tsgo_output(output, config)
-      vim.notify("TSGo: Parsed errors: " .. vim.inspect(result.errors), vim.log.levels.INFO, get_notify_options())
 
       running_processes[project].errors = result.errors
 
