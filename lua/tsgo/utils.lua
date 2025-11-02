@@ -102,7 +102,7 @@ M.parse_tsgo_output = function(output, config)
   end
 
   for _, line in ipairs(output) do
-    local filename, lineno, colno, message = line:match("^(.+):(%d+):(%d+)%s*-%s*error%s*TS%d+:%s*(.+)$")
+    local filename, lineno, colno, _, message = line:match("^(.+):(%d+):(%d+)%s*-(.*):%s*(.+)$")
     if filename ~= nil then
       local text = message
       if config.pretty_errors then
