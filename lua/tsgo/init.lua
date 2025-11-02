@@ -161,23 +161,24 @@ M.run = function()
     notify()
   end
 
-  local function create_output()
-    running_count = running_count - 1
-    if running_count > 0 then
-      return
-    end
-
-    running_count = 0
-    notify_called = false
-    errors = {}
-
-    for _, process in pairs(running_processes) do
-      for _, error in ipairs(process.errors) do
-        table.insert(errors, error)
+    local function create_output()
+      running_count = running_count - 1
+      if running_count > 0 then
+        return
       end
-    end
 
-    utils.set_qflist(errors, {
+      running_count = 0
+      notify_called = false
+      errors = {}
+
+      for _, process in pairs(running_processes) do
+        for _, error in ipairs(process.errors) do
+          table.insert(errors, error)
+        end
+      end
+      vim.notify("TSGo: Final errors before set_qflist: " .. vim.inspect(errors), vim.log.levels.INFO, get_notify_options())
+
+      utils.set_qflist(errors, {
       auto_open = config.auto_open_qflist,
       auto_close = config.auto_close_qflist,
       auto_focus = config.auto_focus_qflist,
@@ -235,15 +236,17 @@ M.run = function()
     )
   end
 
-  local function on_stdout(output, project)
-    local result = utils.parse_tsgo_output(output, config)
+    local function on_stdout(output, project)
+      vim.notify("TSGo: Raw output from tsgo: " .. vim.inspect(output), vim.log.levels.INFO, get_notify_options())
+      local result = utils.parse_tsgo_output(output, config)
+      vim.notify("TSGo: Parsed errors: " .. vim.inspect(result.errors), vim.log.levels.INFO, get_notify_options())
 
-    running_processes[project].errors = result.errors
+      running_processes[project].errors = result.errors
 
-    for _, v in ipairs(result.files) do
-      table.insert(files_with_errors, v)
+      for _, v in ipairs(result.files) do
+        table.insert(files_with_errors, v)
+      end
     end
-  end
 
   local total_output = {}
 
