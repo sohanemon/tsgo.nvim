@@ -1,4 +1,4 @@
-local bm = require("tsc.better-messages")
+local bm = require("tsgo.better-messages")
 
 describe("Does the basics", function()
   it("Replaces the original text with the correct md file text", function()

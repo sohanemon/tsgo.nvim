@@ -1,8 +1,8 @@
-# tsc.nvim
+# tsgo.nvim
 
 <img width="569" alt="image" src="https://user-images.githubusercontent.com/2755722/233876554-efb9cfe6-c038-46c8-a7cb-b7a4aa9eac5b.png">
 
-This Neovim plugin provides an asynchronous interface to run project-wide TypeScript type-checking using the TypeScript compiler (`tsc`). It displays the type-checking results in a quickfix list and provides visual notifications about the progress and completion of type-checking.
+This Neovim plugin provides an asynchronous interface to run project-wide TypeScript type-checking using the TypeScript compiler (`tsgo`). It displays the type-checking results in a quickfix list and provides visual notifications about the progress and completion of type-checking.
 
 ## Features
 
@@ -11,7 +11,7 @@ This Neovim plugin provides an asynchronous interface to run project-wide TypeSc
 - Progress notifications with spinner animation
 - Quickfix list for navigating errors
 - Automatic opening of the quickfix list if there are errors
-- User-friendly command `:TSC`
+- User-friendly command `:TSGo`
 
 ## Demo Videos
 
@@ -36,7 +36,7 @@ To install the plugin, use your preferred Neovim plugin manager.
 To install the plugin using packer.nvim, add the following to your plugin configuration:
 
 ```lua
-use('dmmulroy/tsc.nvim')
+use('oneman/tsgo.nvim')
 
 ```
 
@@ -45,7 +45,7 @@ use('dmmulroy/tsc.nvim')
 To install the plugin using vim-plug, add the following to your plugin configuration:
 
 ```vim
-Plug 'dmmulroy/tsc.nvim'
+Plug 'oneman/tsgo.nvim'
 ```
 
 Then run `:PlugInstall` to install the plugin.
@@ -59,20 +59,20 @@ For an enhanced UI/UX experience, it is recommended to install the [nvim_notify]
 To set up the plugin, add the following line to your `init.vim` or `init.lua` file:
 
 ```lua
-require('tsc').setup()
+require('tsgo').setup()
 ```
 
 ## Usage
 
-To run TypeScript type-checking, execute the `:TSC` command in Neovim. The plugin will display a progress notification while the type-checking is in progress. When the type-checking is complete, it will show a notification with the results and open a quickfix list if there are any errors.
+To run TypeScript type-checking, execute the `:TSGo` command in Neovim. The plugin will display a progress notification while the type-checking is in progress. When the type-checking is complete, it will show a notification with the results and open a quickfix list if there are any errors.
 
-If `watch` mode is enabled, tsc.nvim will automatically run in the background every time you save in a typescript or tsx file and report the results back to you. In addition, if `auto_start_watch_mode` is enabled, the `:TSC` command will be executed on your behalf when you enter a typescript or tsx files.
+If `watch` mode is enabled, tsgo.nvim will automatically run in the background every time you save in a typescript or tsx file and report the results back to you. In addition, if `auto_start_watch_mode` is enabled, the `:TSGo` command will be executed on your behalf when you enter a typescript or tsx files.
 
-To stop any running `:TSC` command, use the `:TSCStop` command in Neovim.
+To stop any running `:TSGo` command, use the `:TSGoStop` command in Neovim.
 
 ## Configuration
 
-By default, the plugin uses the default `tsc` command with the `--noEmit` flag to avoid generating output files during type-checking. It also emulates the default tsc behavior of performing a backward search from the current directory for a `tsconfig` file. The flags option can accept both a string and a table. Here's the default configuration:
+By default, the plugin uses the default `tsgo` command with the `--noEmit` flag to avoid generating output files during type-checking. It also emulates the default tsgo behavior of performing a backward search from the current directory for a `tsconfig` file. The flags option can accept both a string and a table. Here's the default configuration:
 
 ```lua
 {
@@ -84,7 +84,7 @@ By default, the plugin uses the default `tsc` command with the `--noEmit` flag t
   use_diagnostics = false,
   run_as_monorepo = false,
   max_tsconfig_files = 20,
-  bin_path = utils.find_tsc_bin(),
+  bin_path = utils.find_tsgo_bin(),
   enable_progress_notifications = true,
   enable_error_notifications = true,
   flags = {
@@ -110,8 +110,8 @@ flags = "--noEmit",
 
 There are two user commands you can use to open and close the quickfix list:
 
-`TSCOpen` - open the quickfix list
-`TSCClose` - close the quickfix list
+`TSGoOpen` - open the quickfix list
+`TSGoClose` - close the quickfix list
 
 These commands will respect your configuration options:
 
@@ -122,8 +122,8 @@ These commands will respect your configuration options:
 ### Example key maps:
 
 ```lua
-vim.keymap.set('n', '<leader>to', ':TSCOpen<CR>')
-vim.keymap.set('n', '<leader>tc', ':TSCClose<CR>')
+vim.keymap.set('n', '<leader>to', ':TSGoOpen<CR>')
+vim.keymap.set('n', '<leader>tc', ':TSGoClose<CR>')
 ```
 
 ## FAQs
@@ -141,24 +141,24 @@ end
 
 ```
 
-### Why doesn't tsc.nvim typecheck my entire monorepo?
+### Why doesn't tsgo.nvim typecheck my entire monorepo?
 
-By default, tsc.nvim will check only the nearest `tsconfig` file. If you would like it to use all `tsconfig` files in the current working directory, set `run_as_monorepo = true`. All other options will work as usual such as `auto_start_watch_mode`, `flags.watch`, etc.
+By default, tsgo.nvim will check only the nearest `tsconfig` file. If you would like it to use all `tsconfig` files in the current working directory, set `run_as_monorepo = true`. All other options will work as usual such as `auto_start_watch_mode`, `flags.watch`, etc.
 
 ```lua
-require('tsc').setup({
+require('tsgo').setup({
     run_as_monorepo = true,
 })
 ```
 
-With this configuration, tsc.nvim will typecheck all projects in the monorepo, taking into account project references and incremental builds.
+With this configuration, tsgo.nvim will typecheck all projects in the monorepo, taking into account project references and incremental builds.
 
 ### Can I use `Trouble` for the quickfix list?
 
 Yes, as long as you have the plugin installed you can set `use_trouble_qflist = true` in the configuration.
 
 ```lua
-require('tsc').setup({
+require('tsgo').setup({
     use_trouble_qflist = true,
 })
 ```

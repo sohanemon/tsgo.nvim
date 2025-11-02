@@ -1,4 +1,4 @@
-local better_messages = require("tsc.better-messages")
+local better_messages = require("tsgo.better-messages")
 
 local has_trouble, pcall_trouble = pcall(require, "trouble")
 local trouble = has_trouble and pcall_trouble or nil
@@ -9,14 +9,14 @@ M.is_executable = function(cmd)
   return cmd and vim.fn.executable(cmd) == 1 or false
 end
 
-M.find_tsc_bin = function()
-  local node_modules_tsc_binary = vim.fn.findfile("node_modules/.bin/tsc", ".;")
+M.find_tsgo_bin = function()
+  local node_modules_tsgo_binary = vim.fn.findfile("node_modules/.bin/tsgo", ".;")
 
-  if node_modules_tsc_binary ~= "" then
-    return node_modules_tsc_binary
+  if node_modules_tsgo_binary ~= "" then
+    return node_modules_tsgo_binary
   end
 
-  return "tsc"
+  return "tsgo"
 end
 
 --- @param run_mono_repo boolean
@@ -93,7 +93,7 @@ M.parse_flags = function(flags)
   return parsed_flags
 end
 
-M.parse_tsc_output = function(output, config)
+M.parse_tsgo_output = function(output, config)
   local errors = {}
   local files = {}
 
@@ -129,7 +129,7 @@ M.set_qflist = function(errors, opts)
   local DEFAULT_OPTS = { auto_open = true, auto_close = false, use_trouble = false }
   local final_opts = vim.tbl_extend("force", DEFAULT_OPTS, opts or {})
 
-  vim.fn.setqflist({}, "r", { title = "TSC", items = errors })
+  vim.fn.setqflist({}, "r", { title = "TSGo", items = errors })
 
   if #errors > 0 and final_opts.auto_open then
     M.open_qflist(final_opts.use_trouble, final_opts.auto_focus)

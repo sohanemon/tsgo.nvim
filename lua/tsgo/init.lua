@@ -1,5 +1,5 @@
 local success, pcall_result = pcall(require, "notify")
-local utils = require("tsc.utils")
+local utils = require("tsgo.utils")
 
 local M = {}
 
@@ -13,12 +13,12 @@ end
 --- @field auto_open_qflist? boolean - (false) When true the quick fix list will automatically open when errors are found
 --- @field auto_close_qflist? boolean - (false) When true the quick fix list will automatically close when no errors are found
 --- @field auto_focus_qflist? boolean - (false) When true the quick fix list will automatically focus when errors are found
---- @field auto_start_watch_mode? boolean - (false) When true the `tsc` process will be started in watch mode when a typescript buffer is opened
+--- @field auto_start_watch_mode? boolean - (false) When true the `tsgo` process will be started in watch mode when a typescript buffer is opened
 --- @field use_trouble_qflist? boolean - (false) When true the quick fix list will be opened in Trouble if it is installed
 --- @field use_diagnostics? boolean - (false) When true the errors will be set as diagnostics
---- @field run_as_monorepo? boolean - (false) When true the `tsc` process will be started mode for each tsconfig in the current working directory
---- @field max_tsconfig_files? number - (20) Will not run `tsc` if number of found tsconfig files is greater.
---- @field bin_path? string - Path to the tsc binary if it is not in the projects node_modules or globally
+--- @field run_as_monorepo? boolean - (false) When true the `tsgo` process will be started mode for each tsconfig in the current working directory
+--- @field max_tsconfig_files? number - (20) Will not run `tsgo` if number of found tsconfig files is greater.
+--- @field bin_path? string - Path to the tsgo binary if it is not in the projects node_modules or globally
 --- @field enable_progress_notifications? boolean - (true) When false progress notifications will not be shown
 --- @field enable_error_notifications? boolean - (true) When false error notifications will not be shown
 --- @field hide_progress_notifications_from_history? boolean - (true) When true progress notifications will be hidden from history
@@ -49,14 +49,14 @@ local DEFAULT_CONFIG = {
 }
 
 local DEFAULT_NOTIFY_OPTIONS = {
-  title = "TSC",
+  title = "TSGo",
   hide_from_history = false,
-  id = "tsc.nvim",
+  id = "tsgo.nvim",
 }
 
 local config = {} ---@type Opts
 
---- Storage for each running tsc process
+--- Storage for each running tsgo process
 --- @type {[string]:{pid: number, errors: table }}
 local running_processes = {}
 local running_count = 0
@@ -83,17 +83,17 @@ end
 
 M.run = function()
   -- Closed over state
-  local tsc = config.bin_path or utils.find_tsc_bin()
+  local tsgo = config.bin_path or utils.find_tsgo_bin()
   local errors = {}
   local files_with_errors = {}
   local notify_record
   local notify_called = false
   local spinner_idx = 1
 
-  if not utils.is_executable(tsc) then
+  if not utils.is_executable(tsgo) then
     vim.notify(
       format_notification_msg(
-        "tsc was not available or found in your node_modules or $PATH. Please run install and try again."
+        "tsgo was not available or found in your node_modules or $PATH. Please run install and try again."
       ),
       vim.log.levels.ERROR,
       get_notify_options()
@@ -185,7 +185,7 @@ M.run = function()
     })
 
     if config.use_diagnostics then
-      local namespace_id = vim.api.nvim_create_namespace("tsc_diagnostics")
+      local namespace_id = vim.api.nvim_create_namespace("tsgo_diagnostics")
       vim.diagnostic.reset(namespace_id)
 
       for _, error in ipairs(errors) do
@@ -200,7 +200,7 @@ M.run = function()
           col = error.col - 1,
           severity = vim.diagnostic.severity.ERROR,
           message = error.text,
-          source = "tsc",
+          source = "tsgo",
         }
         vim.diagnostic.set(namespace_id, bufnr, { diagnostic }, {})
       end
@@ -236,7 +236,7 @@ M.run = function()
   end
 
   local function on_stdout(output, project)
-    local result = utils.parse_tsc_output(output, config)
+    local result = utils.parse_tsgo_output(output, config)
 
     running_processes[project].errors = result.errors
 
@@ -302,7 +302,7 @@ M.run = function()
     end
     vim.schedule(function()
       running_processes[project] = {
-        pid = vim.fn.jobstart(tsc .. " " .. flags, project_opts),
+        pid = vim.fn.jobstart(tsgo .. " " .. flags, project_opts),
         errors = {},
       }
     end)
@@ -324,27 +324,27 @@ end
 function M.setup(opts)
   config = vim.tbl_deep_extend("force", config, DEFAULT_CONFIG, opts or {})
 
-  vim.api.nvim_create_user_command("TSC", function()
+  vim.api.nvim_create_user_command("TSGo", function()
     M.run()
-  end, { desc = "Run `tsc` asynchronously and load the results into a qflist", force = true })
+  end, { desc = "Run `tsgo` asynchronously and load the results into a qflist", force = true })
 
-  vim.api.nvim_create_user_command("TSCStop", function()
+  vim.api.nvim_create_user_command("TSGoStop", function()
     M.stop()
-    vim.notify_once(format_notification_msg("TSC stopped"), nil, get_notify_options())
-  end, { desc = "stop running `tsc`", force = true })
+    vim.notify_once(format_notification_msg("TSGo stopped"), nil, get_notify_options())
+  end, { desc = "stop running `tsgo`", force = true })
 
-  vim.api.nvim_create_user_command("TSCOpen", function()
+  vim.api.nvim_create_user_command("TSGoOpen", function()
     utils.open_qflist(config.use_trouble_qflist, config.auto_focus_qflist)
   end, { desc = "Open the results in a qflist", force = true })
 
-  vim.api.nvim_create_user_command("TSCClose", function()
+  vim.api.nvim_create_user_command("TSGoClose", function()
     utils.close_qflist(config.use_trouble_qflist)
   end, { desc = "Close the results qflist", force = true })
 
   if config.flags.watch then
     vim.api.nvim_create_autocmd("BufWritePre", {
       pattern = "*.{ts,tsx}",
-      desc = "Run tsc.nvim in watch mode automatically when saving a TypeScript file",
+      desc = "Run tsgo.nvim in watch mode automatically when saving a TypeScript file",
       callback = function()
         if config.enable_progress_notifications then
           vim.notify("Type-checking your project via watch mode, hang tight 🚀", nil, get_notify_options())
@@ -355,7 +355,7 @@ function M.setup(opts)
     if config.auto_start_watch_mode then
       vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
         pattern = "*.{ts,tsx}",
-        desc = "Start tsc.nvim in watch mode automatically when opening a TypeScript file",
+        desc = "Start tsgo.nvim in watch mode automatically when opening a TypeScript file",
         callback = function()
           M.run()
         end,
